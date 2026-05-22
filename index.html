@@ -4,1236 +4,139 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grace — Patient Access Demo</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/zdk6mst.css">
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --surface2: #1a2235;
-    --border: rgba(255,255,255,0.08);
-    --border-accent: rgba(0,120,255,0.35);
-    --blue: #0078ff;
-    --blue-light: #3d9bff;
-    --blue-dim: rgba(0,120,255,0.12);
-    --green: #00d68f;
-    --green-dim: rgba(0,214,143,0.1);
-    --amber: #f59e0b;
-    --amber-dim: rgba(245,158,11,0.1);
-    --red: #ff4d4d;
-    --red-dim: rgba(255,77,77,0.1);
-    --purple: #a78bfa;
-    --purple-dim: rgba(167,139,250,0.1);
-    --text: #e8edf5;
-    --text-secondary: #7d8ca3;
-    --text-muted: #3d4a5c;
-    --font: 'DM Sans', sans-serif;
-    --mono: 'DM Mono', monospace;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-
-  body {
-    background: var(--bg);
-    font-family: var(--font);
-    color: var(--text);
-    min-height: 100vh;
-    overflow: hidden;
-    user-select: none;
-  }
-
-  /* ── SHELL ── */
-  .shell {
-    width: 100vw;
-    height: 100vh;
-    display: grid;
-    grid-template-rows: 56px 1fr 80px;
-    grid-template-columns: 1fr;
-  }
-
-  /* ── TOP BAR ── */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(10,14,26,0.95);
-    backdrop-filter: blur(12px);
-    position: relative;
-    z-index: 10;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .brand-mark {
-    width: 28px;
-    height: 28px;
-    background: var(--blue);
-    border-radius: 7px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    letter-spacing: -0.5px;
-  }
-
-  .brand-name {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: -0.2px;
-  }
-
-  .brand-name span {
-    color: var(--text-secondary);
-    font-weight: 400;
-  }
-
-  .scene-pills {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-  }
-
-  .scene-pill {
-    width: 28px;
-    height: 5px;
-    border-radius: 3px;
-    background: var(--border);
-    transition: all 0.4s ease;
-    cursor: pointer;
-  }
-
-  .scene-pill.active {
-    background: var(--blue);
-    width: 36px;
-  }
-
-  .scene-pill.done {
-    background: var(--blue-dim);
-    border: 1px solid var(--border-accent);
-  }
-
-  .scene-counter {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-family: var(--mono);
-  }
-
-  /* ── STAGE ── */
-  .stage {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Subtle grid background */
-  .stage::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
-
-  /* Scene container */
-  .scene {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-  }
-
-  .scene.active {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  /* ── BOTTOM BAR ── */
-  .bottombar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    border-top: 1px solid var(--border);
-    background: rgba(10,14,26,0.95);
-  }
-
-  .scene-title-block {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .scene-label {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text-muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .scene-title {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .scene-sub {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 1px;
-  }
-
-  .nav-btns {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .btn {
-    height: 38px;
-    padding: 0 20px;
-    border-radius: var(--radius-sm);
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-
-  .btn:hover {
-    background: var(--surface2);
-    color: var(--text);
-    border-color: rgba(255,255,255,0.15);
-  }
-
-  .btn.primary {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: #fff;
-  }
-
-  .btn.primary:hover {
-    background: var(--blue-light);
-    border-color: var(--blue-light);
-  }
-
-  .btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-  }
-
-  /* ── SHARED COMPONENTS ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .card-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-family: var(--mono);
-  }
-
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .dot.blue  { background: var(--blue);  box-shadow: 0 0 6px var(--blue); }
-  .dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
-  .dot.red   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
-  .dot.gray  { background: var(--text-muted); }
-
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-family: var(--mono);
-    font-weight: 500;
-  }
-
-  .tag.blue   { background: var(--blue-dim);   color: var(--blue-light); border: 1px solid rgba(0,120,255,0.2); }
-  .tag.green  { background: var(--green-dim);  color: var(--green);      border: 1px solid rgba(0,214,143,0.2); }
-  .tag.amber  { background: var(--amber-dim);  color: var(--amber);      border: 1px solid rgba(245,158,11,0.2); }
-  .tag.red    { background: var(--red-dim);    color: var(--red);        border: 1px solid rgba(255,77,77,0.2); }
-  .tag.purple { background: var(--purple-dim); color: var(--purple);     border: 1px solid rgba(167,139,250,0.2); }
-
-  /* SMS bubble */
-  .bubble {
-    max-width: 280px;
-    padding: 11px 15px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .bubble.inbound {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-bottom-left-radius: 4px;
-    align-self: flex-start;
-  }
-
-  .bubble.outbound {
-    background: var(--blue);
-    color: #fff;
-    border-bottom-right-radius: 4px;
-    align-self: flex-end;
-  }
-
-  .bubble.grace {
-    background: linear-gradient(135deg, #0052cc, #0078ff);
-    color: #fff;
-    border-bottom-right-radius: 4px;
-    align-self: flex-end;
-  }
-
-  .bubble-time {
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 3px;
-    font-family: var(--mono);
-  }
-
-  .bubble-time.right { text-align: right; }
-
-  /* Flow arrow */
-  .flow-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    font-size: 18px;
-  }
-
-  /* System node */
-  .sys-node {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-align: center;
-  }
-
-  .sys-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    transition: all 0.4s ease;
-  }
-
-  .sys-icon.active-node {
-    border-color: var(--blue);
-    background: var(--blue-dim);
-    box-shadow: 0 0 20px rgba(0,120,255,0.2);
-  }
-
-  .sys-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text);
-  }
-
-  .sys-sub {
-    font-size: 11px;
-    color: var(--text-secondary);
-  }
-
-  /* Animated typing cursor */
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-  .cursor {
-    display: inline-block;
-    width: 2px;
-    height: 14px;
-    background: var(--blue-light);
-    vertical-align: middle;
-    margin-left: 2px;
-    animation: blink 1s steps(1) infinite;
-  }
-
-  /* Pulse ring */
-  @keyframes pulse-ring {
-    0%   { transform: scale(0.9); opacity: 0.8; }
-    100% { transform: scale(1.6); opacity: 0; }
-  }
-
-  .pulse-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .pulse-ring {
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 1.5px solid var(--blue);
-    animation: pulse-ring 1.8s ease-out infinite;
-  }
-
-  /* Fade slide in */
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .anim-delay-1 { animation: fadeSlideUp 0.5s ease forwards; animation-delay: 0.1s; opacity: 0; }
-  .anim-delay-2 { animation: fadeSlideUp 0.5s ease forwards; animation-delay: 0.4s; opacity: 0; }
-  .anim-delay-3 { animation: fadeSlideUp 0.5s ease forwards; animation-delay: 0.7s; opacity: 0; }
-  .anim-delay-4 { animation: fadeSlideUp 0.5s ease forwards; animation-delay: 1.0s; opacity: 0; }
-  .anim-delay-5 { animation: fadeSlideUp 0.5s ease forwards; animation-delay: 1.3s; opacity: 0; }
-  .anim-delay-6 { animation: fadeSlideUp 0.5s ease forwards; animation-delay: 1.6s; opacity: 0; }
-
-  /* Connector line */
-  .connector {
-    height: 2px;
-    background: linear-gradient(90deg, var(--blue), transparent);
-    flex: 1;
-    opacity: 0.3;
-  }
-
-  /* Data row */
-  .data-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 9px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-
-  .data-row:last-child { border-bottom: none; }
-
-  .data-key { color: var(--text-secondary); }
-  .data-val { color: var(--text); font-family: var(--mono); font-size: 12px; }
-
-  /* ── SCENE 0: INTRO ── */
-  #scene-0 .inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    text-align: center;
-    max-width: 560px;
-  }
-
-  #scene-0 .headline {
-    font-size: clamp(28px, 4vw, 42px);
-    font-weight: 300;
-    line-height: 1.2;
-    letter-spacing: -1px;
-    color: var(--text);
-  }
-
-  #scene-0 .headline strong {
-    font-weight: 600;
-    color: var(--blue-light);
-  }
-
-  #scene-0 .sub {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    max-width: 420px;
-  }
-
-  #scene-0 .flow-preview {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  #scene-0 .flow-chip {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-secondary);
-  }
-
-  #scene-0 .flow-chip.accent {
-    border-color: var(--border-accent);
-    background: var(--blue-dim);
-    color: var(--blue-light);
-  }
-
-  /* ── SCENE 1: SMS INBOUND ── */
-  #scene-1 .inner {
-    display: grid;
-    grid-template-columns: 1fr 1px 1fr;
-    gap: 32px;
-    width: 100%;
-    max-width: 760px;
-    align-items: start;
-  }
-
-  #scene-1 .divider {
-    background: var(--border);
-    height: 100%;
-    min-height: 200px;
-    align-self: stretch;
-  }
-
-  #scene-1 .chat-pane {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  #scene-1 .pane-label {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--text-muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  #scene-1 .intent-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding-top: 4px;
-  }
-
-  #scene-1 .intent-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-  }
-
-  #scene-1 .intent-bar {
-    height: 4px;
-    border-radius: 2px;
-    background: var(--blue);
-    transition: width 0.8s ease;
-  }
-
-  /* ── SCENE 2: ATHENA ACTION ── */
-  #scene-2 .inner {
-    display: flex;
-    gap: 24px;
-    max-width: 780px;
-    width: 100%;
-    align-items: flex-start;
-  }
-
-  #scene-2 .left-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  #scene-2 .right-col {
-    width: 280px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .action-step {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    transition: all 0.3s;
-  }
-
-  .action-step.complete {
-    border-color: rgba(0,214,143,0.25);
-    background: var(--green-dim);
-  }
-
-  .action-step .step-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    background: var(--surface2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-
-  .action-step.complete .step-icon {
-    background: var(--green-dim);
-  }
-
-  /* ── SCENE 3: WEBEX ESCALATION ── */
-  #scene-3 .inner {
-    display: flex;
-    gap: 24px;
-    max-width: 760px;
-    width: 100%;
-    align-items: flex-start;
-  }
-
-  .popup-card {
-    background: var(--surface);
-    border: 1px solid var(--border-accent);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: 0 0 40px rgba(0,120,255,0.15);
-  }
-
-  .popup-header {
-    background: var(--blue);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .popup-header .title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-  }
-
-  .popup-header .sub {
-    font-size: 11px;
-    color: rgba(255,255,255,0.7);
-  }
-
-  .popup-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-    flex-shrink: 0;
-  }
-
-  /* ── SCENE 4: DASHBOARD ── */
-  #scene-4 .inner {
-    width: 100%;
-    max-width: 820px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-
-  .kpi-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px 16px;
-  }
-
-  .kpi-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 8px;
-  }
-
-  .kpi-value {
-    font-size: 26px;
-    font-weight: 300;
-    color: var(--text);
-    letter-spacing: -0.5px;
-  }
-
-  .kpi-trend {
-    font-size: 11px;
-    color: var(--green);
-    margin-top: 4px;
-    font-family: var(--mono);
-  }
-
-  .log-row {
-    display: grid;
-    grid-template-columns: 100px 1fr 90px 80px 90px;
-    gap: 12px;
-    padding: 10px 16px;
-    font-size: 12px;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .log-row:last-child { border-bottom: none; }
-  .log-row.header { color: var(--text-muted); font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
-
-  /* ── SCENE 5: SUMMARY ── */
-  #scene-5 .inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 28px;
-    max-width: 640px;
-    text-align: center;
-  }
-
-  #scene-5 .proof-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    width: 100%;
-    text-align: left;
-  }
-
-  .proof-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .proof-item .icon { font-size: 20px; }
-  .proof-item .title { font-size: 13px; font-weight: 500; color: var(--text); }
-  .proof-item .desc  { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
-
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --vital-blue:#0063FF;--deep-indigo:#0051CF;--soft-sky:#A3C7FF;--air-blue:#D8E7FF;
+  --ocean-navy:#091E42;--green:#00D68F;--amber:#F59E0B;--purple:#8B5CF6;
+  --bg:#060D1C;--surface:#0D1929;--surface2:#132236;
+  --border:rgba(163,199,255,0.1);
+  --text:#EDF0F7;--text-sec:#9DA2B3;--text-muted:#3D4A5C;
+  --font-d:'fields',Georgia,serif;--font-ui:'Albert Sans',system-ui,sans-serif;
+}
+body{background:var(--bg);font-family:var(--font-ui);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* Grid bg */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,99,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,99,255,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* Nav */
+nav{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{width:32px;height:32px;background:var(--vital-blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:15px;font-weight:700;color:#fff}
+.brand-name{font-size:14px;font-weight:500;color:var(--text)}
+.brand-name span{color:var(--text-sec);font-weight:400}
+.nav-badge{font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+
+/* Hero */
+.hero{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:80px 48px 56px;gap:20px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--vital-blue);background:rgba(0,99,255,0.1);border:1px solid rgba(0,99,255,0.2);padding:5px 14px;border-radius:20px}
+.hero-title{font-family:var(--font-d);font-size:clamp(32px,5vw,54px);font-weight:300;line-height:1.12;letter-spacing:-1.5px;color:#fff;max-width:640px}
+.hero-title strong{font-weight:600;color:var(--soft-sky)}
+.hero-sub{font-size:16px;color:var(--text-sec);line-height:1.7;max-width:480px}
+
+/* Cards */
+.cards{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 48px 80px;max-width:960px;margin:0 auto;width:100%}
+.demo-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;display:flex;flex-direction:column;gap:20px;cursor:pointer;text-decoration:none;transition:all 0.25s;position:relative;overflow:hidden}
+.demo-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--card-color,var(--vital-blue)) 0%,transparent 60%);opacity:0;transition:opacity 0.25s}
+.demo-card:hover{border-color:var(--card-color,var(--vital-blue));transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,0.3)}
+.demo-card:hover::before{opacity:0.05}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid var(--border)}
+.card-tag{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 10px;border-radius:4px;flex-shrink:0;margin-top:4px}
+.card-body{display:flex;flex-direction:column;gap:10px}
+.card-title{font-family:var(--font-d);font-size:22px;font-weight:400;color:#fff;letter-spacing:-0.3px;line-height:1.2}
+.card-desc{font-size:14px;color:var(--text-sec);line-height:1.65}
+.card-features{display:flex;flex-direction:column;gap:7px;padding-top:4px;border-top:1px solid var(--border)}
+.feat{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-sec)}
+.feat-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.card-cta{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:10px;font-size:14px;font-weight:600;margin-top:4px;transition:all 0.2s}
+
+/* Footer */
+footer{position:relative;z-index:1;margin-top:auto;padding:24px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.footer-note{font-size:12px;color:var(--text-muted)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:12px;color:var(--text-muted);text-decoration:none;transition:color 0.2s}
+.footer-links a:hover{color:var(--text-sec)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.a1{animation:fadeUp 0.6s ease forwards;animation-delay:0.1s;opacity:0}
+.a2{animation:fadeUp 0.6s ease forwards;animation-delay:0.25s;opacity:0}
+.a3{animation:fadeUp 0.6s ease forwards;animation-delay:0.4s;opacity:0}
+.a4{animation:fadeUp 0.6s ease forwards;animation-delay:0.55s;opacity:0}
 </style>
 </head>
 <body>
 
-<div class="shell">
+<nav>
+  <div class="brand">
+    <div class="brand-mark">G</div>
+    <div class="brand-name">Grace <span>· Patient Access Demo</span></div>
+  </div>
+  <div class="nav-badge">VitalCX Internal</div>
+</nav>
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">G</div>
-      <div class="brand-name">Grace <span>· Patient Access Demo</span></div>
+<div class="hero">
+  <div class="eyebrow a1">Demo Environment</div>
+  <h1 class="hero-title a2"><strong>Grace</strong> Patient Access<br>Demo Suite</h1>
+  <p class="hero-sub a3">Two demo formats — choose the one that fits your conversation.</p>
+</div>
+
+<div class="cards">
+
+  <!-- V1: Linear walkthrough -->
+  <a class="demo-card a3" href="v1.html" style="--card-color:#0063FF">
+    <div class="card-top">
+      <div class="card-icon" style="background:rgba(0,99,255,0.1);border-color:rgba(0,99,255,0.2)">📋</div>
+      <div class="card-tag" style="background:rgba(0,99,255,0.1);color:var(--soft-sky);border:1px solid rgba(0,99,255,0.2)">Linear · 6 scenes</div>
     </div>
-    <div class="scene-pills" id="pillsContainer"></div>
-    <div class="scene-counter" id="sceneCounter">01 / 06</div>
-  </header>
-
-  <!-- STAGE -->
-  <main class="stage" id="stage">
-
-    <!-- SCENE 0: INTRO -->
-    <div class="scene active" id="scene-0">
-      <div class="inner">
-        <div class="headline anim-delay-1">
-          <strong>Grace</strong> reduces patient<br>access leakage — automatically.
-        </div>
-        <div class="sub anim-delay-2">
-          This demo walks through how Grace handles a patient SMS conversation, takes action in Athena, escalates through Webex, and logs everything — without a single agent involved.
-        </div>
-        <div class="flow-preview anim-delay-3">
-          <div class="flow-chip accent">SMS</div>
-          <div style="color:var(--text-muted);font-size:12px">→</div>
-          <div class="flow-chip accent">Grace</div>
-          <div style="color:var(--text-muted);font-size:12px">→</div>
-          <div class="flow-chip">Athena</div>
-          <div style="color:var(--text-muted);font-size:12px">→</div>
-          <div class="flow-chip">Webex</div>
-          <div style="color:var(--text-muted);font-size:12px">→</div>
-          <div class="flow-chip">Dashboard</div>
-        </div>
+    <div class="card-body">
+      <div class="card-title">Standard Walkthrough</div>
+      <div class="card-desc">A single guided flow — one click at a time. Best for screen recording, narrated presentations, or first-time client conversations.</div>
+      <div class="card-features">
+        <div class="feat"><div class="feat-dot" style="background:var(--vital-blue)"></div>SMS inbound → intent detection</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--vital-blue)"></div>Athena cancellation action</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--vital-blue)"></div>Webex escalation + screen-pop</div>
+        <div class="feat"><div class="feat-dot" style="background:var(--vital-blue)"></div>Dashboard log + audit trail</div>
       </div>
     </div>
+    <div class="card-cta" style="background:rgba(0,99,255,0.1);color:var(--soft-sky);border:1px solid rgba(0,99,255,0.2)">
+      <span>Open demo</span>
+      <span>→</span>
+    </div>
+  </a>
 
-    <!-- SCENE 1: PATIENT SENDS SMS + INTENT DETECTION -->
-    <div class="scene" id="scene-1">
-      <div class="inner">
-        <!-- Left: Chat -->
-        <div class="chat-pane">
-          <div class="pane-label">Patient SMS thread</div>
-          <div class="anim-delay-1" style="display:flex;flex-direction:column;gap:8px;">
-            <div class="bubble inbound">
-              Hi, I need to cancel my appointment tomorrow. I can't make it.
-            </div>
-            <div class="bubble-time">Maria Sanchez · +1 (602) 555-0142 · 9:14 AM</div>
-          </div>
-          <div class="anim-delay-3" style="display:flex;flex-direction:column;gap:4px;margin-top:12px;align-items:flex-end;">
-            <div class="bubble grace">
-              Hi Maria! I can help with that. I'm looking up your appointment now — one moment.
-            </div>
-            <div class="bubble-time right">Grace · 9:14 AM · delivered</div>
-          </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="divider"></div>
-
-        <!-- Right: Intent detection -->
-        <div class="intent-panel">
-          <div class="pane-label">Grace intent classification</div>
-
-          <div class="anim-delay-2">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;color:var(--text-secondary);">
-              <span>Cancellation request</span><span style="color:var(--green);font-family:var(--mono)">97%</span>
-            </div>
-            <div style="height:4px;background:var(--border);border-radius:2px;">
-              <div class="intent-bar" style="width:97%;background:var(--green);"></div>
-            </div>
-          </div>
-
-          <div class="anim-delay-3">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;color:var(--text-secondary);">
-              <span>Rescheduling request</span><span style="font-family:var(--mono);color:var(--text-muted)">2%</span>
-            </div>
-            <div style="height:4px;background:var(--border);border-radius:2px;">
-              <div class="intent-bar" style="width:2%;background:var(--blue-dim);"></div>
-            </div>
-          </div>
-
-          <div class="anim-delay-3">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;color:var(--text-secondary);">
-              <span>General inquiry</span><span style="font-family:var(--mono);color:var(--text-muted)">1%</span>
-            </div>
-            <div style="height:4px;background:var(--border);border-radius:2px;">
-              <div class="intent-bar" style="width:1%;background:var(--blue-dim);"></div>
-            </div>
-          </div>
-
-          <div class="anim-delay-4" style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
-            <div class="action-step">
-              <div class="step-icon">🔍</div>
-              <div>
-                <div style="font-weight:500;margin-bottom:2px;">Patient lookup</div>
-                <div style="font-size:11px;color:var(--text-secondary);">Searching Athena for Maria Sanchez</div>
-              </div>
-              <span class="tag blue" style="margin-left:auto">running</span>
-            </div>
-          </div>
-
-          <div class="anim-delay-5" style="margin-top:4px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);">
-            <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);margin-bottom:4px;">DETECTED CONTEXT</div>
-            <div style="font-size:12px;color:var(--text);line-height:1.6;">
-              Channel: <span style="color:var(--blue-light)">SMS</span> &nbsp;·&nbsp;
-              Language: <span style="color:var(--blue-light)">English</span> &nbsp;·&nbsp;
-              Intent: <span style="color:var(--green)">Cancellation</span>
-            </div>
-          </div>
-        </div>
+  <!-- V2: Track switcher -->
+  <a class="demo-card a4" href="v2.html" style="--card-color:#A78BFA">
+    <div class="card-top">
+      <div class="card-icon" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.2)">🎛️</div>
+      <div class="card-tag" style="background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.25)">3 tracks · pick your story</div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">Multi-Track Demo</div>
+      <div class="card-desc">Three demo tracks from a single launcher. Switch between them mid-conversation without losing context or reloading.</div>
+      <div class="card-features">
+        <div class="feat"><div class="feat-dot" style="background:var(--vital-blue)"></div><span style="color:var(--soft-sky);font-weight:500">SMS · English</span> — standard patient access flow</div>
+        <div class="feat"><div class="feat-dot" style="background:#00C48C"></div><span style="color:#00C48C;font-weight:500">SMS · Español</span> — bilingual language proof point</div>
+        <div class="feat"><div class="feat-dot" style="background:#a78bfa"></div><span style="color:#a78bfa;font-weight:500">Voice</span> — AI receptionist, not a phone tree</div>
       </div>
     </div>
-
-    <!-- SCENE 2: ATHENA ACTION -->
-    <div class="scene" id="scene-2">
-      <div class="inner">
-        <div class="left-col">
-          <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Athena sandbox — appointment actions</div>
-
-          <div class="action-step complete anim-delay-1">
-            <div class="step-icon">✓</div>
-            <div>
-              <div style="font-weight:500;color:var(--green)">Patient found</div>
-              <div style="font-size:11px;color:var(--text-secondary);">Maria Sanchez · DOB 04/12/1985 · ID ATH-00291</div>
-            </div>
-            <span class="tag green" style="margin-left:auto">done</span>
-          </div>
-
-          <div class="action-step complete anim-delay-2">
-            <div class="step-icon">✓</div>
-            <div>
-              <div style="font-weight:500;color:var(--green)">Appointment located</div>
-              <div style="font-size:11px;color:var(--text-secondary);">May 23 · 10:30 AM · Dr. Alvarez · Primary Care</div>
-            </div>
-            <span class="tag green" style="margin-left:auto">done</span>
-          </div>
-
-          <div class="action-step complete anim-delay-3">
-            <div class="step-icon">✓</div>
-            <div>
-              <div style="font-weight:500;color:var(--green)">Cancellation confirmed</div>
-              <div style="font-size:11px;color:var(--text-secondary);">Cancelled in Athena · slot released · case note created</div>
-            </div>
-            <span class="tag green" style="margin-left:auto">done</span>
-          </div>
-
-          <div class="action-step anim-delay-4" style="border-color:rgba(0,120,255,0.25);background:var(--blue-dim);">
-            <div class="step-icon" style="background:var(--blue-dim);">💬</div>
-            <div>
-              <div style="font-weight:500;color:var(--blue-light)">Patient confirmation sent</div>
-              <div style="font-size:11px;color:var(--text-secondary);">SMS reply with cancellation confirmation + offer to reschedule</div>
-            </div>
-            <span class="tag blue" style="margin-left:auto">sent</span>
-          </div>
-
-          <div class="anim-delay-5" style="display:flex;flex-direction:column;gap:6px;margin-top:4px;align-items:flex-end;">
-            <div class="bubble grace" style="max-width:100%">
-              Your appointment with Dr. Alvarez on May 23 at 10:30 AM has been cancelled. Would you like to reschedule? Reply YES and I'll find available times.
-            </div>
-            <div class="bubble-time right">Grace · 9:14 AM · delivered</div>
-          </div>
-        </div>
-
-        <div class="right-col">
-          <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Athena record</div>
-          <div class="card anim-delay-2">
-            <div class="card-header">
-              <div class="dot green"></div>
-              athena.sandbox · appt-00291
-            </div>
-            <div class="data-row">
-              <span class="data-key">Patient</span>
-              <span class="data-val">M. Sanchez</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Appt date</span>
-              <span class="data-val">May 23 10:30</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Provider</span>
-              <span class="data-val">Dr. Alvarez</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Status</span>
-              <span class="tag green">Cancelled</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Actor</span>
-              <span class="tag blue">Grace AI</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Timestamp</span>
-              <span class="data-val">09:14:07</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="card-cta" style="background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.25)">
+      <span>Open demo</span>
+      <span>→</span>
     </div>
-
-    <!-- SCENE 3: ESCALATION TO WEBEX -->
-    <div class="scene" id="scene-3">
-      <div class="inner" style="flex-direction:column;max-width:720px;gap:20px;">
-        <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;">Escalation path — patient requests live support</div>
-
-        <!-- SMS thread continuation -->
-        <div class="anim-delay-1" style="display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;gap:16px;">
-            <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
-              <div class="bubble inbound" style="max-width:none;">
-                Actually, I need to talk to someone. This is a complicated situation with my insurance.
-              </div>
-              <div class="bubble-time">Maria · 9:15 AM</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-end;">
-              <div class="bubble grace" style="max-width:none;">
-                Of course. I'm connecting you to the access team now with your full context so you won't need to repeat yourself.
-              </div>
-              <div class="bubble-time right">Grace · 9:15 AM</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Webex popup -->
-        <div class="popup-card anim-delay-3" style="max-width:480px;align-self:center;width:100%;">
-          <div class="popup-header">
-            <div class="pulse-wrap">
-              <div class="pulse-ring"></div>
-              <div class="popup-avatar">JR</div>
-            </div>
-            <div>
-              <div class="title">Incoming: Grace escalation → Jordan R.</div>
-              <div class="sub">Access Team · Scheduling queue · Webex sandbox</div>
-            </div>
-          </div>
-          <div style="padding:4px 0;">
-            <div class="data-row"><span class="data-key">Patient</span><span class="data-val">Maria Sanchez</span></div>
-            <div class="data-row"><span class="data-key">Channel</span><span class="tag blue">SMS</span></div>
-            <div class="data-row"><span class="data-key">Intent</span><span class="tag amber">Insurance · billing query</span></div>
-            <div class="data-row"><span class="data-key">Grace completed</span><span class="data-val" style="color:var(--green);">Cancellation ✓</span></div>
-            <div class="data-row"><span class="data-key">Reason</span><span class="data-val" style="font-size:11px;">Patient requested live support</span></div>
-            <div class="data-row"><span class="data-key">Transcript</span><span style="color:var(--blue-light);font-size:12px;cursor:pointer;">View in dashboard →</span></div>
-            <div class="data-row"><span class="data-key">Next step</span><span class="data-val" style="font-size:11px;color:var(--amber);">Address insurance question</span></div>
-          </div>
-        </div>
-
-        <div class="anim-delay-5" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <div class="tag green"><span>✓</span> Warm transfer sent</div>
-          <div class="tag blue"><span>✓</span> Screen-pop delivered</div>
-          <div class="tag purple"><span>✓</span> Transcript linked</div>
-          <div class="tag amber"><span>✓</span> Context preserved</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SCENE 4: DASHBOARD -->
-    <div class="scene" id="scene-4">
-      <div class="inner">
-        <div style="font-size:11px;font-family:var(--mono);color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;">Grace dashboard — interaction log</div>
-
-        <div class="dashboard-grid anim-delay-1">
-          <div class="kpi-card">
-            <div class="kpi-label">SMS resolved</div>
-            <div class="kpi-value">24</div>
-            <div class="kpi-trend">↑ 8 vs yesterday</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Athena actions</div>
-            <div class="kpi-value">19</div>
-            <div class="kpi-trend" style="color:var(--green);">100% success rate</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Escalations</div>
-            <div class="kpi-value">3</div>
-            <div class="kpi-trend" style="color:var(--text-secondary);">All with full context</div>
-          </div>
-        </div>
-
-        <div class="card anim-delay-2">
-          <div class="card-header">
-            <div class="dot blue"></div>
-            interaction log · today · 12 records
-          </div>
-          <div class="log-row header">
-            <span>Time</span>
-            <span>Patient</span>
-            <span>Channel</span>
-            <span>Outcome</span>
-            <span>Status</span>
-          </div>
-          <div class="log-row anim-delay-3" style="background:rgba(0,120,255,0.04);">
-            <span style="font-family:var(--mono);color:var(--text-secondary);font-size:11px;">09:14</span>
-            <span style="font-weight:500;">Maria Sanchez</span>
-            <span><div class="tag blue">SMS</div></span>
-            <span style="font-size:12px;color:var(--text-secondary);">Cancelled · escalated</span>
-            <span><div class="tag amber">Escalated</div></span>
-          </div>
-          <div class="log-row">
-            <span style="font-family:var(--mono);color:var(--text-secondary);font-size:11px;">09:02</span>
-            <span>James Okafor</span>
-            <span><div class="tag blue">SMS</div></span>
-            <span style="font-size:12px;color:var(--text-secondary);">Confirmed appt</span>
-            <span><div class="tag green">Resolved</div></span>
-          </div>
-          <div class="log-row">
-            <span style="font-family:var(--mono);color:var(--text-secondary);font-size:11px;">08:55</span>
-            <span>Linda Torres</span>
-            <span><div class="tag purple">Voice</div></span>
-            <span style="font-size:12px;color:var(--text-secondary);">Rescheduled · new slot</span>
-            <span><div class="tag green">Resolved</div></span>
-          </div>
-          <div class="log-row">
-            <span style="font-family:var(--mono);color:var(--text-secondary);font-size:11px;">08:41</span>
-            <span>R. Fitzgerald</span>
-            <span><div class="tag purple">Voice</div></span>
-            <span style="font-size:12px;color:var(--text-secondary);">Referral routed</span>
-            <span><div class="tag green">Resolved</div></span>
-          </div>
-          <div class="log-row">
-            <span style="font-family:var(--mono);color:var(--text-secondary);font-size:11px;">08:33</span>
-            <span>D. Moreno</span>
-            <span><div class="tag blue">SMS</div></span>
-            <span style="font-size:12px;color:var(--text-secondary);">New appt booked</span>
-            <span><div class="tag green">Resolved</div></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SCENE 5: SUMMARY -->
-    <div class="scene" id="scene-5">
-      <div class="inner">
-        <div class="anim-delay-1" style="font-size:clamp(22px,3vw,32px);font-weight:300;letter-spacing:-0.5px;line-height:1.3;">
-          The operational proof points — in one demo.
-        </div>
-        <div class="proof-grid anim-delay-2">
-          <div class="proof-item">
-            <div class="icon">💬</div>
-            <div class="title">SMS automation</div>
-            <div class="desc">Grace responds instantly to inbound texts in English and Spanish, classifies intent, and acts — no agent required.</div>
-          </div>
-          <div class="proof-item">
-            <div class="icon">🏥</div>
-            <div class="title">Athena actions</div>
-            <div class="desc">Patient lookup, appointment lookup, confirm, cancel, reschedule, new booking, and case creation — all in the sandbox.</div>
-          </div>
-          <div class="proof-item">
-            <div class="icon">🎙️</div>
-            <div class="title">AI receptionist</div>
-            <div class="desc">Inbound voice with intent detection routes callers correctly without behaving like a traditional IVR.</div>
-          </div>
-          <div class="proof-item">
-            <div class="icon">🔁</div>
-            <div class="title">Webex escalation</div>
-            <div class="desc">When humans are needed, Grace transfers with a full context pop-up — patient never has to repeat themselves.</div>
-          </div>
-        </div>
-        <div class="anim-delay-3" style="font-size:13px;color:var(--text-secondary);max-width:480px;line-height:1.7;">
-          Every interaction — SMS, voice, Athena result, Webex transfer — is logged to the dashboard with a transcript, summary, and audit trail.
-        </div>
-        <div class="anim-delay-4" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-          <div class="tag green">✓ Sandbox only · no real PHI</div>
-          <div class="tag blue">✓ EN + ES support</div>
-          <div class="tag purple">✓ Reusable across prospects</div>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- BOTTOM BAR -->
-  <footer class="bottombar">
-    <div class="scene-title-block" id="sceneTitleBlock">
-      <div class="scene-label" id="sceneLabel">Scene 1</div>
-      <div class="scene-title" id="sceneTitle">Overview</div>
-      <div class="scene-sub" id="sceneSub"></div>
-    </div>
-    <div class="nav-btns">
-      <button class="btn" id="btnPrev" onclick="prevScene()">← Back</button>
-      <button class="btn primary" id="btnNext" onclick="nextScene()">Next →</button>
-    </div>
-  </footer>
+  </a>
 
 </div>
 
-<script>
-  const scenes = [
-    {
-      label: 'Scene 01',
-      title: 'The problem Grace solves',
-      sub: 'Unanswered SMS → avoidable calls → overloaded access teams',
-    },
-    {
-      label: 'Scene 02',
-      title: 'Patient sends an SMS',
-      sub: 'Grace classifies intent in real time — cancellation detected at 97%',
-    },
-    {
-      label: 'Scene 03',
-      title: 'Athena takes action',
-      sub: 'Lookup → appointment found → cancelled in sandbox → patient notified',
-    },
-    {
-      label: 'Scene 04',
-      title: 'Webex escalation',
-      sub: 'Patient requests live help — warm transfer with full context pop-up',
-    },
-    {
-      label: 'Scene 05',
-      title: 'Dashboard visibility',
-      sub: 'Every interaction logged with transcript, outcome, and Athena result',
-    },
-    {
-      label: 'Scene 06',
-      title: 'Demo summary',
-      sub: 'Four proof points. One reusable sandbox. Repeatable across prospects.',
-    },
-  ];
+<footer>
+  <div class="footer-note">VitalCX · Grace Patient Access Demo · Sandbox only · No real PHI</div>
+  <div class="footer-links">
+    <a href="v1.html">Linear walkthrough</a>
+    <a href="v2.html">Multi-track demo</a>
+  </div>
+</footer>
 
-  let current = 0;
-
-  function updateUI() {
-    // Scenes
-    document.querySelectorAll('.scene').forEach((s, i) => {
-      s.classList.toggle('active', i === current);
-    });
-
-    // Pills
-    const pills = document.getElementById('pillsContainer');
-    pills.innerHTML = '';
-    scenes.forEach((_, i) => {
-      const p = document.createElement('div');
-      p.className = 'scene-pill' + (i === current ? ' active' : i < current ? ' done' : '');
-      p.onclick = () => goTo(i);
-      pills.appendChild(p);
-    });
-
-    // Counter
-    document.getElementById('sceneCounter').textContent =
-      String(current + 1).padStart(2,'0') + ' / ' + String(scenes.length).padStart(2,'0');
-
-    // Bottom bar
-    const s = scenes[current];
-    document.getElementById('sceneLabel').textContent = s.label;
-    document.getElementById('sceneTitle').textContent = s.title;
-    document.getElementById('sceneSub').textContent = s.sub;
-
-    // Buttons
-    document.getElementById('btnPrev').disabled = current === 0;
-    document.getElementById('btnNext').textContent = current === scenes.length - 1 ? '↺ Restart' : 'Next →';
-  }
-
-  function goTo(n) {
-    current = n;
-    updateUI();
-  }
-
-  function nextScene() {
-    if (current < scenes.length - 1) { current++; updateUI(); }
-    else { current = 0; updateUI(); }
-  }
-
-  function prevScene() {
-    if (current > 0) { current--; updateUI(); }
-  }
-
-  // Keyboard nav
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextScene(); }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); prevScene(); }
-  });
-
-  updateUI();
-</script>
 </body>
 </html>
